@@ -1,37 +1,28 @@
-# Pull fro base image
-FROM python:3.10.4-alpine3.15
-
-# Maintainer
+#Pull from base image
+FROM python:3.9-alpine3.13
 LABEL MAINTAINER="Abdulmumin Akinde"
 
-# Set environment variable
 ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-# ENV PATH=/scripts:${PATH}
 
-# Copy requirements file
-COPY ./requirements.txt /requirements.txt
-
-# Run some commands
-RUN apk add --update --no-cache  --virtual .tmp gcc libc-dev linux-headers
-
-RUN pip install -r /requirements.txt && \
-    apk del .tmp && \
-    mkdir /app
-
+COPY ./requirements.txt /tmp/requirements.txt
+COPY ./requirements.dev.txt /tmp/requirements.dev.txt
 COPY ./app /app
-
 WORKDIR /app
+EXPOSE 8000
 
-# COPY ./scripts /scripts
+ARG DEV=false
+RUN python -m venv /py && \
+    /py/bin/pip install --upgrade pip && \
+    /py/bin/pip install -r /tmp/requirements.txt && \
+    if [ $DEV = "true" ]; \
+        then /py/bin/pip install -r /tmp/requirements.dev.txt ; \
+    fi && \
+    rm -rf /tmp && \
+    adduser \
+        --disabled-password \
+        --no-create-home \
+        abdulmumin
 
-# RUN chmod +x /scripts/* && \
-RUN adduser -D user
+ENV PATH="/py/bin:$PATH"
 
-# RUN mkdir -p vol/web/media && \
-    # mkdir -p  vol/web/ && \
-    # chown -R user:user /vol && \
-    # chmod -R 755 /vol/web
-
-USER user
-
+USER abdulmumin
