@@ -26,7 +26,7 @@ services:
       - dev-db-data:/var/lib/poatgresql/data
     environment:
       - POSTGRES_DB=dev-db
-      - POSTGRES_DB=dev-user
+      - POSTGRES_USER=dev-user
       - POSTGRES_PASSWORD=supersecret
 
 volumes:
